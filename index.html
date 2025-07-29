@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zipper pcs/kg Calculator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 20px;
+  }
+
+  .container {
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .remove-btn {
+    background-color: #dc3545;
+  }
+
+  .remove-btn:hover {
+    background-color: #a71d2a;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Zipper pcs/kg Calculator</h2>
+
+  <table id="zipperTable">
+    <thead>
+      <tr>
+        <th>Size (L)</th>
+        <th>Type</th>
+        <th>Weight per pc (g)</th>
+        <th>pcs per kg</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <button onclick="addRow()">Add Row</button>
+</div>
+
+<script>
+const refValues = {
+  "M#4 (cm)": 0.3807694484,
+  "M#4 (inch)": 0.9785491746,
+  "M#5 CE (inch)": 1.424338247,
+  "M#5 OE (inch)": 1.397255646
+};
+
+function calculateWeight(type, L) {
+  if (isNaN(L) || L <= 0) return NaN;
+  return refValues[type] * L;
+}
+
+function pcsPerKg(weight) {
+  return weight > 0 ? 1000 / weight : NaN;
+}
+
+function addRow() {
+  const tbody = document.getElementById("tableBody");
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td><input type="number" step="any" min="0" class="sizeInput" placeholder="Enter size"/></td>
+    <td>
+      <select class="typeSelect">
+        ${Object.keys(refValues).map(t => `<option value="${t}">${t}</option>`).join('')}
+      </select>
+    </td>
+    <td class="weightCell">-</td>
+    <td class="pcsCell">-</td>
+    <td><button class="remove-btn" onclick="removeRow(this)">Remove</button></td>
+  `;
+
+  tbody.appendChild(tr);
+
+  const sizeInput = tr.querySelector(".sizeInput");
+  const typeSelect = tr.querySelector(".typeSelect");
+
+  function updateRow() {
+    const size = parseFloat(sizeInput.value);
+    const type = typeSelect.value;
+    const weight = calculateWeight(type, size);
+    const pcs = pcsPerKg(weight);
+
+    tr.querySelector(".weightCell").textContent = isNaN(weight) ? "-" : weight.toFixed(3);
+    tr.querySelector(".pcsCell").textContent = isNaN(pcs) ? "-" : pcs.toFixed(2);
+  }
+
+  sizeInput.addEventListener("input", updateRow);
+  typeSelect.addEventListener("change", updateRow);
+}
+
+function removeRow(button) {
+  button.closest("tr").remove();
+}
+
+// Initialize with one row
+addRow();
+</script>
+
+</body>
+</html>
